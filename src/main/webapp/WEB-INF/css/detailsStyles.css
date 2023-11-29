@@ -1,0 +1,39 @@
+/* detailsStyles.css */
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+.cinema-details {
+    width: 50%;
+    margin: auto;
+    border: 1px solid #ddd;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cinema-details img {
+    max-width: 40%;
+    height: auto;
+    margin-bottom: 20px;
+}
+
+.cinema-info {
+    margin-bottom: 20px;
+}
+
+.label {
+    font-weight: bold;
+}
+
+a {
+    display: block;
+    margin-top: 20px;
+    text-decoration: none;
+    color: #007BFF;
+}
+
+a:hover {
+    text-decoration: underline;
+}

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app
+        xmlns="https://jakarta.ee/xml/ns/jakartaee"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
+        version="6.0">
+
+    <display-name>Archetype Created Web Application</display-name>
+    <!-- add servlet -->
+
+    <filter>
+        <filter-name>authFilter</filter-name>
+        <filter-class>com.poluectov.criticine.webapp.web.filter.AuthenticationFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>authFilter</filter-name>
+        <url-pattern>/app/</url-pattern>
+    </filter-mapping>
+
+    <servlet>
+        <servlet-name>main</servlet-name>
+        <servlet-class>com.poluectov.criticine.webapp.web.servlet.MainServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>main</servlet-name>
+        <url-pattern>/app/</url-pattern>
+    </servlet-mapping>
+
+</web-app>

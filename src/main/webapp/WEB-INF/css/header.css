@@ -1,0 +1,64 @@
+body {
+    font-family: Arial, sans-serif;
+}
+.header {
+    background-color: #333;
+    padding: 10px 20px;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+nav li {
+    margin-right: 20px;
+}
+
+nav a {
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+}
+
+.button-container {
+    display: flex;
+    gap: 10px;
+}
+
+.signin-button {
+    background-color: #4CAF50;
+    padding: 8px 16px;
+    border-radius: 5px;
+}
+
+.login-button {
+    border-color: #333333;
+    border-width: 3px;
+    background-color: #f1f1f1;
+    padding: 8px 16px;
+    border-radius: 5px;
+}
+
+.signin-link {
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+}
+
+.login-link {
+    text-decoration: none;
+    color: #333333;
+    font-weight: bold;
+}
