@@ -2,10 +2,9 @@ package com.poluectov.criticine.webapp.controller.createcinemapage;
 
 import com.poluectov.criticine.webapp.ApplicationContext;
 import com.poluectov.criticine.webapp.controller.ErrorMessage;
+import com.poluectov.criticine.webapp.controller.HttpMethodEnum;
 import com.poluectov.criticine.webapp.controller.ServletCommand;
-import com.poluectov.criticine.webapp.dao.mysqldao.MySQLCinemaTypeDao;
 import com.poluectov.criticine.webapp.exception.DataBaseNotAvailableException;
-import com.poluectov.criticine.webapp.exception.StatementNotCreatedException;
 import com.poluectov.criticine.webapp.model.data.Cinema;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
@@ -14,7 +13,6 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
-import jakarta.servlet.jsp.el.ScopedAttributeELResolver;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +26,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static com.poluectov.criticine.webapp.controller.HttpMethodEnum.POST;
+import static com.poluectov.criticine.webapp.controller.HttpMethodEnum.PUT;
+
 public class PostCreateCinemaCommand implements ServletCommand {
+
+    HttpMethodEnum method;
+
+    public PostCreateCinemaCommand(HttpMethodEnum method){
+        this.method = method;
+    }
+
+    public PostCreateCinemaCommand() {
+        method = POST;
+    }
 
     @Override
     public void execute(ServletRequest req, ServletResponse resp) throws ServletException, IOException {
@@ -48,21 +59,56 @@ public class PostCreateCinemaCommand implements ServletCommand {
         }
         String pictureFileName = ApplicationContext.DEFAULT_CINEMA_PICTURE_FILE_NAME;
         Part filePart = request.getPart("picture"); // Retrieves <input type="file" name="file">
-        String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
-            // refines the fileName in case it is an absolute path
-        if (!fileName.equals("")){
-            fileName = sanitizeFileName(fileName);
-            pictureFileName = generateUniqueFileName(fileName);
-            String filePath = uploadPath + File.separator + pictureFileName;
 
-            File file = new File(filePath);
-            try (InputStream input = filePart.getInputStream()) {
-                Files.copy(input, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                System.out.println("uploaded in " + file.getAbsolutePath());
-            }catch (IOException e){
-                pictureFileName = ApplicationContext.DEFAULT_CINEMA_PICTURE_FILE_NAME;
-                errors.add(new ErrorMessage("picture-error", "Picture failed to load"));
+        String cinemaIdStr = request.getParameter("cinema-id");
+        int cinemaId = -1;
+        if (cinemaIdStr != null) {
+            try{
+                cinemaId = Integer.parseInt(cinemaIdStr);
+            }catch (NumberFormatException e){
+                errors.add(new ErrorMessage("id-validation-error", "id should be an actual identification number"));
             }
+        }
+        Cinema existingCinema = null;
+        if (cinemaId != -1){
+            try{
+                existingCinema = ApplicationContext.INSTANCE.getCinemaDAO().get(cinemaId);
+            }catch (DataBaseNotAvailableException e){
+                errors.add(new ErrorMessage(ErrorMessage.DB_CONNECTION, "Data Base not available. Please try later"));
+            }catch (SQLException e){
+                errors.add(new ErrorMessage(ErrorMessage.DB_ERROR, "Data base error"));
+            }
+
+            if (errors.isEmpty() && existingCinema == null){
+                errors.add(new ErrorMessage("id-validation-error", "id should be an actual identification number"));
+            }
+        }
+
+        if (filePart != null){
+            String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+            // refines the fileName in case it is an absolute path
+            if (!fileName.equals("")){
+                fileName = sanitizeFileName(fileName);
+                pictureFileName = generateUniqueFileName(fileName);
+                String filePath = uploadPath + File.separator + pictureFileName;
+
+                File file = new File(filePath);
+                try (InputStream input = filePart.getInputStream()) {
+                    Files.copy(input, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    System.out.println("uploaded in " + file.getAbsolutePath());
+                }catch (IOException e){
+                    pictureFileName = ApplicationContext.DEFAULT_CINEMA_PICTURE_FILE_NAME;
+                    errors.add(new ErrorMessage("picture-error", "Picture failed to load"));
+                }
+            }else {
+                if (existingCinema != null){
+                    pictureFileName = existingCinema.getPictureFile();
+                }
+            }
+        }
+        float rating = 0.0f;
+        if (existingCinema != null){
+            rating = existingCinema.getRating();
         }
 
         String cinemaName = request.getParameter("cinema-name");
@@ -83,22 +129,23 @@ public class PostCreateCinemaCommand implements ServletCommand {
             errors.add(new ErrorMessage("incorrect_year", "Year field not valid"));
         }
         if (errors.isEmpty()){
-            Cinema cinema = new Cinema(cinemaName, 0.0f, creationYear, pictureFileName, cinemaTypeId);
+            Cinema cinema = new Cinema(cinemaName, rating, creationYear, pictureFileName, cinemaTypeId);
+            if (cinemaId != -1) cinema.setId(cinemaId);
             try{
-                ApplicationContext.INSTANCE.getCinemaDAO().create(cinema);
+                processCinema(cinema);
                 System.out.println(cinema + " has been added");
-            }catch (DataBaseNotAvailableException e){
+            } catch (DataBaseNotAvailableException e){
                 errors.add(new ErrorMessage(ErrorMessage.DB_CONNECTION,
                         "Data Base not available. Please try later"));
-            }catch (SQLException e){
+            } catch (SQLException e){
                 errors.add(new ErrorMessage(ErrorMessage.DB_ERROR,
                         "Data base error"));
             }
         }
 
         if (!errors.isEmpty()){
-            System.out.println(errors);
-            RequestDispatcher dispatcher = request.getRequestDispatcher(ApplicationContext.JSP_REGISTRATION_PAGE);
+            request.setAttribute("errors", errors);
+            RequestDispatcher dispatcher = request.getRequestDispatcher(ApplicationContext.JSP_CREATE_MOVIE_PAGE);
             dispatcher.forward(request, response);
         }else{
             response.sendRedirect(ApplicationContext.DOMAIN_ADDRESS + ApplicationContext.MAIN_PAGE_ADDRESS);
@@ -148,5 +195,14 @@ public class PostCreateCinemaCommand implements ServletCommand {
             return -1;
         }
         return creationYear;
+    }
+
+
+    private void processCinema(Cinema cinema) throws SQLException{
+        if (method.equals(POST)){
+            ApplicationContext.INSTANCE.getCinemaDAO().create(cinema);
+        }else if (method.equals(PUT)){
+            ApplicationContext.INSTANCE.getCinemaDAO().update(cinema.getId(), cinema);
+        }
     }
 }

@@ -7,6 +7,7 @@ import com.poluectov.criticine.webapp.dao.UserDAO;
 import com.poluectov.criticine.webapp.exception.DataBaseNotAvailableException;
 import com.poluectov.criticine.webapp.exception.StatementNotCreatedException;
 import com.poluectov.criticine.webapp.model.data.User;
+import com.poluectov.criticine.webapp.model.security.PasswordVerifier;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
@@ -40,7 +41,7 @@ public class PostRegistrationPageCommand implements ServletCommand {
 
 
         //TODO: get password hash
-        String passwordHash = password + "abc";
+        String passwordHash = PasswordVerifier.createPasswordHash(password);
 
         User user = new User(name, email, passwordHash);
 

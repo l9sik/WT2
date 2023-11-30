@@ -17,6 +17,13 @@ public class UserCinemaReview {
         this.review = review;
     }
 
+    public UserCinemaReview(int userId, int cinemaId, int rating, String review) {
+        this.userId = userId;
+        this.cinemaId = cinemaId;
+        this.rating = rating;
+        this.review = review;
+    }
+
     public int getId() {
         return id;
     }

@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <title>CritiCine</title>
     <style>
-        <%@include file="/WEB-INF/css/header.css"%>
+        <%@include file="/WEB-INF/css/form.css"%>
     </style>
 </head>
 <body>
@@ -15,8 +15,8 @@
         <label for="user_name">name</label>
         <input type="text" name="user_name" id="user_name" placeholder="user_name...">
         <br>
-        <label for="user_password_hash">password</label>
-        <input type="password" name="user_password_hash" id="user_password_hash" placeholder="your_password...">
+        <label for="user_password">password</label>
+        <input type="password" name="user_password" id="user_password" placeholder="your_password...">
         <br>
         <button type="submit" class="signin-button">sign in</button>
     </form>

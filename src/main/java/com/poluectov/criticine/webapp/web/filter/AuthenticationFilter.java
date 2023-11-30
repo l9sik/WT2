@@ -21,7 +21,8 @@ public class AuthenticationFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
 
         String userName = request.getParameter("user_name");
-        String passwordHash = request.getParameter("user_password_hash");
+        String password = request.getParameter("user_password");
+
 
         HttpSession session = request.getSession();
         boolean dbAccessible = true;
@@ -34,32 +35,41 @@ public class AuthenticationFilter implements Filter {
             dbAccessible = false;
         }
 
-        //logged
-        if (userName != null && passwordHash != null && session.getAttribute("user_name") != null){
-            return;
-        }else {
-            try {
-                if (dbAccessible){
-                    User user = userDAO.userByPassword(userName, passwordHash);
-                    //Not logged
-                    if (user == null){
-                        logout(session);
+        try {
+            //logged
+            if (userName == null && password == null && session.getAttribute("user_name") != null) {
+                return;
+            } else {
+                try {
+                    if (dbAccessible) {
+                        User user = userDAO.userByName(userName);
+                        //Not logged
+                        if (user == null) {
+                            logout(session);
+                        } else {
+                            //just logged
+                            boolean isVerified = PasswordVerifier.verifyPassword(password, user.getPasswordHash());
 
-                    }else {
-                        //just logged
-                        int id = user.getRoleId();
+                            if (isVerified){
+                                int id = user.getRoleId();
+                                session.setAttribute("user_id", user.getId());
+                                session.setAttribute("user_name", user.getName());
+                                session.setAttribute("user_password_hash", user.getPasswordHash());
+                                session.setAttribute("user_role", id);
+                            }else {
+                                logout(session);
+                            }
+                        }
 
-                        session.setAttribute("user_name", userName);
-                        session.setAttribute("user_password_hash", passwordHash);
-                        session.setAttribute("user_role", id);
                     }
-
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    logout(session);
+                    dbAccessible = false;
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
-                logout(session);
-                dbAccessible = false;
             }
+        }finally {
+            filterChain.doFilter(request, response);
         }
     }
 

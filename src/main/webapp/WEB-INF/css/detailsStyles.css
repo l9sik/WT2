@@ -37,3 +37,16 @@ a {
 a:hover {
     text-decoration: underline;
 }
+
+.rating-container {
+    display: inline-block;
+    border-radius: 50%;
+    background-color: #007BFF; /* Set your desired background color */
+    color: #fff; /* Set your desired text color */
+    width: 50px; /* Set your desired width */
+    height: 50px; /* Set your desired height */
+    text-align: center;
+    line-height: 50px; /* Should be the same as height for centering */
+    font-size: 20px; /* Set your desired font size */
+    font-weight: bold;
+}

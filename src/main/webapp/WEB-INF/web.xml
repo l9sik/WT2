@@ -15,7 +15,7 @@
 
     <filter-mapping>
         <filter-name>authFilter</filter-name>
-        <url-pattern>/app/</url-pattern>
+        <url-pattern>/app/*</url-pattern>
     </filter-mapping>
 
     <servlet>

@@ -14,16 +14,18 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class MySQLUserDao implements UserDAO {
-    private static final String USER_ID = "user_id";
-    private static final String USER_NAME = "user_name";
-    private static final String USER_EMAIL = "user_email";
-    private static final String USER_PASSWORD_HASH = "user_password_hash";
-    private static final String USER_IS_VERIFIED = "user_is_verified";
-    private static final String USER_ROLE = "fk_user_role";
-    private static final String USER_STATUS = "user_status";
+    public static final String USER_ID = "user_id";
+    public static final String USER_NAME = "user_name";
+    public static final String USER_EMAIL = "user_email";
+    public static final String USER_PASSWORD_HASH = "user_password_hash";
+    public static final String USER_IS_VERIFIED = "user_is_verified";
+    public static final String USER_ROLE = "fk_user_role";
+    public static final String USER_STATUS = "user_status";
+    public static final String DB = "user";
 
-    private static final String getUserSQL = "SELECT * FROM user WHERE user_id = ?";
-    private static final String insertUserSQL = "INSERT INTO user ("
+
+    private static final String getUserSQL = "SELECT * FROM "+DB+" WHERE "+USER_ID+" = ?";
+    private static final String insertUserSQL = "INSERT INTO "+DB+" ("
             +USER_NAME+", "
             +USER_EMAIL+", "
             +USER_PASSWORD_HASH+", "
@@ -31,7 +33,7 @@ public class MySQLUserDao implements UserDAO {
             +USER_ROLE+", "
             +USER_STATUS+")" +
             "VALUES (?, ?, ?, ?, ?, ?)";
-    private static final String updateUserIdSQL = "UPDATE user " +
+    private static final String updateUserIdSQL = "UPDATE "+DB+" " +
             "SET "
             + USER_NAME + "=?, "
             + USER_EMAIL + "=?, "
@@ -41,9 +43,12 @@ public class MySQLUserDao implements UserDAO {
             + USER_STATUS + "=? " + "WHERE "
             + USER_ID + "=?";
 
-    private static final String isUserInDBSQL = "SELECT * FROM user WHERE "
+    private static final String isUserInDBSQL = "SELECT * FROM "+DB+" WHERE "
             +USER_NAME+"=? AND "
             +USER_PASSWORD_HASH+"=?";
+    private static final String userByNameSQL = "SELECT * FROM "+DB+" WHERE "
+            +USER_NAME+"=?";
+
 
     private static final int USER_ID_UPDATE_REQUEST_COUNT = 7;
     ConnectionPool connectionPool;
@@ -94,15 +99,45 @@ public class MySQLUserDao implements UserDAO {
 
     @Override
     public User userByPassword(String name, String password) throws SQLException{
+        if (name == null || password == null){
+            return null;
+        }
         try(WrappedConnection connection = connectionPool.getConnection()) {
             try(PreparedStatement statement = connection.prepareStatement(isUserInDBSQL)){
                 statement.setString(1, name);
-                statement.setString(1, password);
+                statement.setString(2, password);
                 try(ResultSet resultSet = statement.executeQuery()) {
 
                     if (resultSet.next()) {
                         return createUser(resultSet);
                     }
+
+                }
+            }
+        }catch (DataBaseNotAvailableException | StatementNotCreatedException e) {
+            throw e;
+        }catch (SQLException e){
+            e.printStackTrace();
+            throw new SQLException("Exception when getting from dataBase", e);
+        }catch (Exception e){
+            //in case when .close method brings exception
+            throw new RuntimeException("close() method in WrappedConnection failed", e);
+        }
+        return null;
+    }
+
+    @Override
+    public User userByName(String name) throws SQLException {
+        if (name == null) return null;
+        try(WrappedConnection connection = connectionPool.getConnection()) {
+            try(PreparedStatement statement = connection.prepareStatement(userByNameSQL)){
+                statement.setString(1, name);
+                try(ResultSet resultSet = statement.executeQuery()) {
+
+                    if (resultSet.next()) {
+                        return createUser(resultSet);
+                    }
+
                 }
             }
         }catch (DataBaseNotAvailableException | StatementNotCreatedException e) {

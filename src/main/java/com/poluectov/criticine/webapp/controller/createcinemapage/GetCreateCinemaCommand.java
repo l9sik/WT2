@@ -3,7 +3,10 @@ package com.poluectov.criticine.webapp.controller.createcinemapage;
 import com.poluectov.criticine.webapp.ApplicationContext;
 import com.poluectov.criticine.webapp.controller.ErrorMessage;
 import com.poluectov.criticine.webapp.controller.ServletCommand;
+import com.poluectov.criticine.webapp.dao.mysqldao.MySQLUserDao;
 import com.poluectov.criticine.webapp.exception.DataBaseNotAvailableException;
+import com.poluectov.criticine.webapp.exception.RequestCorruptedException;
+import com.poluectov.criticine.webapp.exception.ServletControllerNotFoundException;
 import com.poluectov.criticine.webapp.model.data.CinemaType;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
@@ -25,6 +28,17 @@ public class GetCreateCinemaCommand implements ServletCommand {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse resp = (HttpServletResponse) response;
 
+        Object o = req.getSession().getAttribute("user_role");
+        Integer role = (Integer) o;
+        if (o == null || !role.equals(2)){
+            try {
+                ApplicationContext.INSTANCE.getControllerCommander().getCommand(null).execute(request, response);
+            } catch (ServletControllerNotFoundException | RequestCorruptedException e) {
+             //ignore
+            }
+            return;
+        }
+
         List<ErrorMessage> errors = new ArrayList<>();
         List<CinemaType> cinemaTypes = new ArrayList<>();
         try {
@@ -34,8 +48,20 @@ public class GetCreateCinemaCommand implements ServletCommand {
         } catch (SQLException e) {
             errors.add(new ErrorMessage(ErrorMessage.DB_ERROR, "Data base error"));
         }
+        String cinemaId = req.getParameter("cinema-id");
+        String cinemaName = req.getParameter("cinema-name");
+        String creationYear = req.getParameter("cinema-creation-year");
 
-        req.getSession().setAttribute("cinemaTypes", cinemaTypes);
+
+        //PUT, DELETE pages
+        String method = req.getParameter("method");
+        if (method != null) req.setAttribute("method", method);
+
+        if (cinemaId != null) req.setAttribute("cinema_id", cinemaId);
+        if (cinemaName != null) req.setAttribute("cinema_name", cinemaName);
+        if (creationYear != null) req.setAttribute("cinema_creation_year", creationYear);
+
+        req.setAttribute("cinemaTypes", cinemaTypes);
         if (!errors.isEmpty()){
             System.out.println(errors);
             req.getSession().setAttribute("errors", errors);

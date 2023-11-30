@@ -7,13 +7,13 @@ import jakarta.servlet.http.HttpServletRequest;
 public class HttpStandartControllerCommander implements ControllerCommander {
     ServletCommand get;
     ServletCommand post;
-    ServletCommand patch;
+    ServletCommand put;
     ServletCommand delete;
 
-    public HttpStandartControllerCommander(ServletCommand get, ServletCommand post, ServletCommand patch, ServletCommand delete) {
+    public HttpStandartControllerCommander(ServletCommand get, ServletCommand post, ServletCommand put, ServletCommand delete) {
         this.get = get;
         this.post = post;
-        this.patch = patch;
+        this.put = put;
         this.delete = delete;
     }
 
@@ -29,19 +29,23 @@ public class HttpStandartControllerCommander implements ControllerCommander {
             return get;
         }
         if (method.equalsIgnoreCase("POST")) {
+            String methodStr = request.getParameter("method");
+            if (methodStr == null){
+                if (post == null)
+                    throw new ServletControllerNotFoundException("Post not supported");
+                return post;
+            }else if (methodStr.equalsIgnoreCase("PUT")){
+                if (put == null)
+                    throw new ServletControllerNotFoundException("Put not supported");
+                return put;
+            }else if (methodStr.equalsIgnoreCase("DELETE")) {
+                if (delete == null)
+                    throw new ServletControllerNotFoundException("Delete not supported");
+                return delete;
+            }
             if (post == null)
                 throw new ServletControllerNotFoundException("Post not supported");
             return post;
-        }
-        if (method.equalsIgnoreCase("PATCH")) {
-            if (patch == null)
-                throw new ServletControllerNotFoundException("Patch not supported");
-            return patch;
-        }
-        if (method.equalsIgnoreCase("DELETE")) {
-            if (delete == null)
-                throw new ServletControllerNotFoundException("Delete not supported");
-            return delete;
         }
         throw new ServletControllerNotFoundException("Method not supported");
     }

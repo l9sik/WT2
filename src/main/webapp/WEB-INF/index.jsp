@@ -38,7 +38,7 @@
 
     <h2><fmt:message key="hello"/></h2>
 
-    <c:if test="${sessionScope.role == 2}">
+    <c:if test="${sessionScope.user_role == 2}">
         <div>
             <a href="m/create"><button>Create Film</button></a>
             <a href="critics"><button>Critics</button></a>

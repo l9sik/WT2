@@ -8,5 +8,6 @@ public interface UserDAO extends DAO<User> {
 
 
     User userByPassword(String name, String password) throws SQLException;
+    User userByName(String name) throws SQLException;
 
 }

@@ -6,6 +6,8 @@ import com.poluectov.criticine.webapp.controller.ServletCommand;
 import com.poluectov.criticine.webapp.exception.DataBaseNotAvailableException;
 import com.poluectov.criticine.webapp.model.data.Cinema;
 import com.poluectov.criticine.webapp.service.CinemaListService;
+import com.poluectov.criticine.webapp.service.Filter;
+import com.poluectov.criticine.webapp.service.ServiceFilter;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
@@ -25,7 +27,7 @@ public class GetMainPageCommand implements ServletCommand {
 
         int page = getPage(request.getParameter("page"));
         String sortBy = request.getParameter("sortBy");
-        CinemaListService.Filter filter = new CinemaListService.Filter(null, sortBy);
+        Filter filter = new ServiceFilter(null, sortBy);
 
         try {
             cinemas = ApplicationContext.INSTANCE.getCinemaListService().getCinemaList(filter, page);

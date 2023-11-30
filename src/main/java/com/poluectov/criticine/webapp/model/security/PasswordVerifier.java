@@ -14,7 +14,4 @@ public class PasswordVerifier {
         return BCrypt.checkpw(password, storedHash);
     }
 
-
-
-
 }

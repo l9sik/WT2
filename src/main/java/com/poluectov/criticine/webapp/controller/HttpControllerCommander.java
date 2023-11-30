@@ -13,19 +13,23 @@ public class HttpControllerCommander implements ControllerCommander {
     ControllerCommander notFoundPage;
     public HttpControllerCommander(ControllerCommander mainPageControllerCommander,
                                    ControllerCommander registrationControllerCommander,
+                                   ControllerCommander loginControllerCommander,
                                    ControllerCommander reviewControllerCommander,
                                    ControllerCommander criticsControllerCommander,
                                    ControllerCommander createCinemaControllerCommander,
                                    ControllerCommander cinemaControllerCommander,
+                                   ControllerCommander logoutControllerCommander,
                                    ControllerCommander notFoundPageControllerCommander){
         controllerFactoryMap = new HashMap<>();
         notFoundPage = notFoundPageControllerCommander;
 
         controllerFactoryMap.put(null, mainPageControllerCommander);
         controllerFactoryMap.put(ApplicationContext.REGISTRATION_PAGE_ADDRESS, registrationControllerCommander);
+        controllerFactoryMap.put(ApplicationContext.LOGIN_PAGE_ADDRESS, loginControllerCommander);
         controllerFactoryMap.put(ApplicationContext.REVIEW_PAGE_ADDRESS, reviewControllerCommander);
         controllerFactoryMap.put(ApplicationContext.CRITICS_PAGE_ADDRESS, criticsControllerCommander);
         controllerFactoryMap.put(ApplicationContext.CREATE_CINEMA_ADDRESS, createCinemaControllerCommander);
+        controllerFactoryMap.put(ApplicationContext.LOGOUT_PAGE_ADDRESS, logoutControllerCommander);
         controllerFactoryMap.put(ApplicationContext.CINEMA_ADDRESS, cinemaControllerCommander);
     }
     @Override

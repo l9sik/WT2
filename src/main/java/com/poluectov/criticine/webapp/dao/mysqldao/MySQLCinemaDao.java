@@ -32,7 +32,7 @@ public class MySQLCinemaDao implements CinemaDAO {
             + CINEMA_RATING + "=?, "
             + CINEMA_CREATING_YEAR + "=?, "
             + CINEMA_PICTURE + "=?, "
-            + CINEMA_FK_CINEMA_TYPE + "=?" +
+            + CINEMA_FK_CINEMA_TYPE + "=? " +
             "WHERE " + CINEMA_ID + "=?";
 
     ConnectionPool connectionPool;
