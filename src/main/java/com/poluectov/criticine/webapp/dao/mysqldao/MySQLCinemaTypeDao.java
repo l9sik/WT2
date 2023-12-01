@@ -72,4 +72,17 @@ public class MySQLCinemaTypeDao implements CinemaTypeDAO {
         }
         return 1;
     }
+
+    @Override
+    public CinemaType get(int id) throws SQLException {
+        if (bufferedList == null || bufferedList.isEmpty()){
+            bufferedList = getFromDataBase();
+        }
+        for (CinemaType cinemaType : bufferedList){
+            if (cinemaType.getId() == id){
+                return cinemaType;
+            }
+        }
+        return null;
+    }
 }

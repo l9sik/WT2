@@ -11,6 +11,7 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -18,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GetCriticsCommand implements ServletCommand {
+
+    Logger logger = Logger.getLogger(GetCriticsCommand.class);
     @Override
     public void execute(ServletRequest req, ServletResponse resp) throws ServletException, IOException {
         HttpServletRequest request = (HttpServletRequest) req;
@@ -35,10 +38,11 @@ public class GetCriticsCommand implements ServletCommand {
         try{
              reviews = ApplicationContext.INSTANCE.getCriticsListService().getCriticsList(null, page);
         }catch (DataBaseNotAvailableException e){
-            errors.add(new ErrorMessage("data_base_not_available",
-                    "Data base not available right now. Please try later"));
+            logger.error(e);
+            errors.add(new ErrorMessage(ErrorMessage.DB_CONNECTION));
         }catch (SQLException e){
             e.printStackTrace();
+            errors.add(new ErrorMessage(ErrorMessage.DB_ERROR));
         }
 
         request.setAttribute("reviews", reviews);

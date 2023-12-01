@@ -13,6 +13,7 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
+import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,10 +27,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+
 import static com.poluectov.criticine.webapp.controller.HttpMethodEnum.POST;
 import static com.poluectov.criticine.webapp.controller.HttpMethodEnum.PUT;
 
 public class PostCreateCinemaCommand implements ServletCommand {
+
+    private static Logger logger = Logger.getLogger(PostCreateCinemaCommand.class.getName());
 
     HttpMethodEnum method;
 
@@ -66,7 +70,8 @@ public class PostCreateCinemaCommand implements ServletCommand {
             try{
                 cinemaId = Integer.parseInt(cinemaIdStr);
             }catch (NumberFormatException e){
-                errors.add(new ErrorMessage("id-validation-error", "id should be an actual identification number"));
+                logger.error(e);
+                errors.add(new ErrorMessage(ErrorMessage.VALIDATION_ERROR));
             }
         }
         Cinema existingCinema = null;
@@ -74,13 +79,16 @@ public class PostCreateCinemaCommand implements ServletCommand {
             try{
                 existingCinema = ApplicationContext.INSTANCE.getCinemaDAO().get(cinemaId);
             }catch (DataBaseNotAvailableException e){
-                errors.add(new ErrorMessage(ErrorMessage.DB_CONNECTION, "Data Base not available. Please try later"));
+                logger.error(e);
+                errors.add(new ErrorMessage(ErrorMessage.DB_CONNECTION));
             }catch (SQLException e){
-                errors.add(new ErrorMessage(ErrorMessage.DB_ERROR, "Data base error"));
+                logger.error(e);
+                errors.add(new ErrorMessage(ErrorMessage.DB_ERROR));
             }
 
             if (errors.isEmpty() && existingCinema == null){
-                errors.add(new ErrorMessage("id-validation-error", "id should be an actual identification number"));
+                logger.error(ErrorMessage.VALIDATION_ERROR);
+                errors.add(new ErrorMessage(ErrorMessage.VALIDATION_ERROR));
             }
         }
 
@@ -97,8 +105,9 @@ public class PostCreateCinemaCommand implements ServletCommand {
                     Files.copy(input, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
                     System.out.println("uploaded in " + file.getAbsolutePath());
                 }catch (IOException e){
+                    logger.error(e);
                     pictureFileName = ApplicationContext.DEFAULT_CINEMA_PICTURE_FILE_NAME;
-                    errors.add(new ErrorMessage("picture-error", "Picture failed to load"));
+                    errors.add(new ErrorMessage(ErrorMessage.PICTURE_ERROR));
                 }
             }else {
                 if (existingCinema != null){
@@ -117,16 +126,21 @@ public class PostCreateCinemaCommand implements ServletCommand {
         String cinemaType = request.getParameter("cinema-type");
         int cinemaTypeId = 1;
         try {
-            cinemaTypeId = ApplicationContext.INSTANCE.getCinemaTypeDAO().getCinemaTypeId(cinemaType);
+            cinemaTypeId = ApplicationContext.INSTANCE.getCinemaTypeDAO().get(Integer.parseInt(cinemaType)).getId();
         }catch (DataBaseNotAvailableException e){
-            errors.add(new ErrorMessage(ErrorMessage.DB_CONNECTION, "Data Base not available. Please try later"));
+            logger.error(e);
+            errors.add(new ErrorMessage(ErrorMessage.DB_CONNECTION));
         }catch (SQLException e){
-            errors.add(new ErrorMessage(ErrorMessage.DB_ERROR, "Data base error"));
+            logger.error(e);
+            errors.add(new ErrorMessage(ErrorMessage.DB_ERROR));
+        }catch (NumberFormatException e){
+            logger.error(e);
+            errors.add(new ErrorMessage(ErrorMessage.VALIDATION_ERROR));
         }
 
         int creationYear = validYear(year);
         if (creationYear == -1){
-            errors.add(new ErrorMessage("incorrect_year", "Year field not valid"));
+            errors.add(new ErrorMessage(ErrorMessage.YEAR_ERROR));
         }
         if (errors.isEmpty()){
             Cinema cinema = new Cinema(cinemaName, rating, creationYear, pictureFileName, cinemaTypeId);
@@ -135,11 +149,11 @@ public class PostCreateCinemaCommand implements ServletCommand {
                 processCinema(cinema);
                 System.out.println(cinema + " has been added");
             } catch (DataBaseNotAvailableException e){
-                errors.add(new ErrorMessage(ErrorMessage.DB_CONNECTION,
-                        "Data Base not available. Please try later"));
+                logger.error(e);
+                errors.add(new ErrorMessage(ErrorMessage.DB_CONNECTION));
             } catch (SQLException e){
-                errors.add(new ErrorMessage(ErrorMessage.DB_ERROR,
-                        "Data base error"));
+                logger.info(e);
+                errors.add(new ErrorMessage(ErrorMessage.DB_ERROR));
             }
         }
 

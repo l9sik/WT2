@@ -28,6 +28,8 @@ import com.poluectov.criticine.webapp.service.CriticsListService;
 import com.poluectov.criticine.webapp.service.impl.MySQLCinemaListService;
 import com.poluectov.criticine.webapp.service.impl.MySQLCriticsListService;
 
+import java.util.Arrays;
+
 /**
  * Global instances through application
  */
@@ -123,6 +125,11 @@ public class ApplicationContext {
         this.criticsListService = new MySQLCriticsListService(dbConnectionPool, PAGE_LIMIT);
     }
 
+    /**
+     * Get the CinemaTypeDAO instance.
+     * If the instance is not yet created, create a new instance and return it.
+     * @return the CinemaTypeDAO instance
+     */
     public CinemaTypeDAO getCinemaTypeDAO() {
         if (cinemaTypeDAO == null){
             cinemaTypeDAO = new MySQLCinemaTypeDao(dbConnectionPool);
@@ -130,8 +137,14 @@ public class ApplicationContext {
         return cinemaTypeDAO;
     }
 
+    /**
+     * Returns the CinemaDAO instance.
+     *
+     * @return the CinemaDAO instance
+     */
     public CinemaDAO getCinemaDAO() {
-        if (cinemaDAO == null){
+        // Create the CinemaDAO instance if it doesn't exist
+        if (cinemaDAO == null) {
             cinemaDAO = new MySQLCinemaDao(dbConnectionPool);
         }
         return cinemaDAO;

@@ -1,10 +1,12 @@
 package com.poluectov.criticine.webapp.dao.mysqldao;
 
+import com.poluectov.criticine.webapp.controller.criticspage.GetCriticsCommand;
 import com.poluectov.criticine.webapp.dao.DAO;
 import com.poluectov.criticine.webapp.dao.connectionpool.WrappedConnection;
 import com.poluectov.criticine.webapp.exception.DataBaseNotAvailableException;
 import com.poluectov.criticine.webapp.exception.StatementNotCreatedException;
 import com.poluectov.criticine.webapp.model.data.User;
+import org.apache.log4j.Logger;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,6 +17,8 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class MySQLDao<T> {
+
+    Logger logger = Logger.getLogger(MySQLDao.class);
 
 
     /**
@@ -43,14 +47,17 @@ public class MySQLDao<T> {
                 }
             }
         }catch (DataBaseNotAvailableException | StatementNotCreatedException e) {
+            logger.error(e);
             throw e;
         }catch (SQLException e){
-            e.printStackTrace();
+            logger.error(e);
             throw new SQLException("Exception when getting from dataBase", e);
         }catch (Exception e){
             //in case when .close method brings exception
+            logger.error("maybe .close() method in WrappedConnection failed", e);
             throw new RuntimeException("close() method in WrappedConnection failed", e);
         }
+        logger.info(id + " in " + statementString + " not found");
         return null;
     }
 
@@ -72,11 +79,13 @@ public class MySQLDao<T> {
                 statement.executeUpdate();
             }
         }catch (StatementNotCreatedException e) {
+            logger.error(e);
             throw e;
         }catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             throw new SQLException("Exception while creating instance in Data Base", e);
         } catch (Exception e) {
+            logger.error(e);
             throw new RuntimeException("close() method in WrappedConnection failed", e);
         }
     }
@@ -106,15 +115,15 @@ public class MySQLDao<T> {
             }
 
         }catch (StatementNotCreatedException e) {
+            logger.error(e);
             throw e;
         }catch (SQLException e){
-            e.printStackTrace();
+            logger.error(e);
             throw new SQLException("Exception while updating instance in Data Base", e);
         }catch (Exception e){
-            e.printStackTrace();
+            logger.error(e);
             throw new RuntimeException("close() method in WrappedConnection failed", e);
         }
-
     }
 
 }

@@ -4,7 +4,10 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
-<fmt:setLocale value="en"/>
+<%@ page isELIgnored="false" %>
+<fmt:setBundle basename="messages"/>
+
+<fmt:setLocale value="${sessionScope.locale}"/>
 <fmt:bundle basename="messages"/>
 <html>
 <head>
@@ -40,8 +43,8 @@
 
     <c:if test="${sessionScope.user_role == 2}">
         <div>
-            <a href="m/create"><button>Create Film</button></a>
-            <a href="critics"><button>Critics</button></a>
+            <a href="m/create"><button><fmt:message key="main.create_cinema"/></button></a>
+            <a href="critics"><button><fmt:message key="main.critics"/></button></a>
         </div>
     </c:if>
 
@@ -49,24 +52,25 @@
         <table border="1">
             <thead>
                 <tr>
-                    <th>Picture</th>
-                    <th data-filter="cinema_name">Name</th>
-                    <th data-filter="cinema_rating">Rating</th>
-                    <th data-filter="cinema_creation_year">Creation Year</th>
-                    <th data-filter="fk_cinema_type">Type</th>
+                    <th><fmt:message key="main.picture"/></th>
+                    <th data-filter="cinema_name"><fmt:message key="main.cinema_name"/></th>
+                    <th data-filter="cinema_rating"><fmt:message key="main.cinema_rating"/></th>
+                    <th data-filter="cinema_creation_year"><fmt:message key="main.cinema_creation_year"/></th>
+                    <th data-filter="fk_cinema_type"><fmt:message key="main.cinema_type"/></th>
                 </tr>
             </thead>
             <tbody>
             <c:forEach var="cinema" items="${cinemas}">
                 <tr>
                     <td>
-                        <a href="m/cinema?cinema=${cinema.getId()}"><img src="../uploads/${cinema.getPictureFile()}" alt="Film Picture"></a>
+                        <a href="m/cinema?cinema=${cinema.getId()}"><img src="../uploads/${cinema.getPictureFile()}" alt="<fmt:message key="main.picture.placeholder"/>"></a>
                     </td>
                     <td>${cinema.getName()}</td>
-                    <td>${cinema.getRating()}</td>
+                    <fmt:formatNumber value="${cinema.getRating()}" pattern="#,##0.00" var="formattedNumber" />
+                    <td>${formattedNumber}</td>
                     <td>${cinema.getCreationYear()}</td>
                     <td>
-                        ${cinema.getCinemaType().getTypeName()}
+                        <fmt:message key="${cinema.getCinemaType().getTypeName()}"/>
                     </td>
                 </tr>
             </c:forEach>
@@ -78,7 +82,7 @@
     <c:if test="${not empty errors}">
         <ul>
             <c:forEach items="${errors}" var="error">
-                <li>${error.error}: ${error.message}</li>
+                <li><fmt:message key="${error.getError()}"/></li>
             </c:forEach>
         </ul>
     </c:if>

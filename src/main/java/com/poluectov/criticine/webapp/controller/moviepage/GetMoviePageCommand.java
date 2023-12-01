@@ -3,12 +3,14 @@ package com.poluectov.criticine.webapp.controller.moviepage;
 import com.poluectov.criticine.webapp.ApplicationContext;
 import com.poluectov.criticine.webapp.controller.ErrorMessage;
 import com.poluectov.criticine.webapp.controller.ServletCommand;
+import com.poluectov.criticine.webapp.controller.criticspage.GetCriticsCommand;
 import com.poluectov.criticine.webapp.dao.mysqldao.MySQLUserCinemaReviewDao;
 import com.poluectov.criticine.webapp.exception.DataBaseNotAvailableException;
 import com.poluectov.criticine.webapp.exception.RequestCorruptedException;
 import com.poluectov.criticine.webapp.exception.ServletControllerNotFoundException;
 import com.poluectov.criticine.webapp.exception.StatementNotCreatedException;
 import com.poluectov.criticine.webapp.model.data.Cinema;
+import com.poluectov.criticine.webapp.model.data.CinemaType;
 import com.poluectov.criticine.webapp.model.data.UserCinemaReview;
 import com.poluectov.criticine.webapp.service.Filter;
 import com.poluectov.criticine.webapp.service.ServiceFilter;
@@ -18,12 +20,14 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
 
 public class GetMoviePageCommand implements ServletCommand {
+    Logger logger = Logger.getLogger(GetMoviePageCommand.class);
     @Override
     public void execute(ServletRequest req, ServletResponse resp) throws ServletException, IOException {
         HttpServletRequest request = (HttpServletRequest) req;
@@ -40,6 +44,7 @@ public class GetMoviePageCommand implements ServletCommand {
         try{
             cinemaId = Integer.parseInt(cinemaIdString);
         }catch (NullPointerException e){
+            logger.info("cinemaId is null or not int");
             isInt = false;
         }
         int page = 0;
@@ -64,6 +69,8 @@ public class GetMoviePageCommand implements ServletCommand {
             //TODO: add page counter;
             try{
                 cinema = ApplicationContext.INSTANCE.getCinemaDAO().get(cinemaId);
+                CinemaType type = ApplicationContext.INSTANCE.getCinemaTypeDAO().get(cinema.getCinemaTypeId());
+                cinema.setCinemaType(type);
                 Map<String, Object> criticsFilterMap = Map.of(MySQLUserCinemaReviewDao.FK_CINEMA_ID, cinema.getId());
 
                 Filter criticsFilter = new ServiceFilter(criticsFilterMap, null);
@@ -71,13 +78,14 @@ public class GetMoviePageCommand implements ServletCommand {
                         .getCriticsListService()
                         .getCriticsList(criticsFilter, page);
             }catch (DataBaseNotAvailableException e){
-                errors.add(new ErrorMessage(ErrorMessage.DB_CONNECTION, "Error: connection to data base"));
+                logger.error(e);
+                errors.add(new ErrorMessage(ErrorMessage.DB_CONNECTION));
             }catch (StatementNotCreatedException e){
-                e.printStackTrace();
-                errors.add(new ErrorMessage(ErrorMessage.DB_NOT_WORKING, "Data base not working."));
+                logger.error(e);
+                errors.add(new ErrorMessage(ErrorMessage.DB_NOT_WORKING));
             }catch (SQLException e){
-                e.printStackTrace();
-                errors.add(new ErrorMessage(ErrorMessage.DB_ERROR, "Data base error."));
+                logger.error(e);
+                errors.add(new ErrorMessage(ErrorMessage.DB_ERROR));
             }
 
             request.setAttribute("cinema", cinema);

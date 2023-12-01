@@ -9,6 +9,7 @@ import com.poluectov.criticine.webapp.exception.StatementNotCreatedException;
 import com.poluectov.criticine.webapp.model.data.Cinema;
 import com.poluectov.criticine.webapp.model.data.CinemaType;
 import com.poluectov.criticine.webapp.service.Filter;
+import org.apache.log4j.Logger;
 import org.eclipse.tags.shaded.org.apache.xpath.functions.Function2Args;
 
 import java.sql.PreparedStatement;
@@ -22,6 +23,8 @@ import static com.poluectov.criticine.webapp.dao.mysqldao.MySQLCinemaDao.*;
 import static com.poluectov.criticine.webapp.dao.mysqldao.MySQLCinemaDao.CINEMA_FK_CINEMA_TYPE;
 
 public class MySQLListServiceHelper {
+
+    private static final Logger logger = Logger.getLogger(MySQLListServiceHelper.class);
     public static void addFilter(Filter filter, StringBuilder countSqlBuilder) {
         if (filter != null && filter.getFilters() != null && !filter.getFilters().isEmpty()) {
             countSqlBuilder.append(" WHERE ");
@@ -62,16 +65,11 @@ public class MySQLListServiceHelper {
                     }
                 }
             }
-        } catch (DataBaseNotAvailableException e) {
+        } catch (SQLException e) {
+            logger.error(e);
             throw e;
-        }catch (StatementNotCreatedException e){
-            e.printStackTrace();
-            throw e;
-        }catch (SQLException e) {
-            e.printStackTrace();
-            throw e;
-        }catch (Exception e){
-            e.printStackTrace();
+        } catch (Exception e){
+            logger.error(e);
             throw new RuntimeException(e);
         }
         return list;
@@ -88,16 +86,19 @@ public class MySQLListServiceHelper {
                 try (ResultSet resultSet = statement.executeQuery()) {
                     if (resultSet.next()){
                         return resultSet.getInt(1);
+                    }else{
+                        logger.info("For statement " + sql + " return 0");
                     }
                 }
             }
         } catch (DataBaseNotAvailableException e) {
+            logger.error(e);
             throw e;
         }catch (StatementNotCreatedException e){
-            e.printStackTrace();
+            logger.error(e);
             throw e;
         }catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e);
             throw new RuntimeException(e);
         }
         return 0;

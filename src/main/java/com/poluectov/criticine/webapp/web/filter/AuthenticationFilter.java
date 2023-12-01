@@ -10,15 +10,21 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.sql.SQLException;
 
 public class AuthenticationFilter implements Filter {
+    private static final Logger logger = Logger.getLogger(AuthenticationFilter.class);
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
+
+        //setting locale
+        String locale = request.getLocale().getLanguage();
+        request.getSession().setAttribute("locale", locale);
 
         String userName = request.getParameter("user_name");
         String password = request.getParameter("user_password");
@@ -38,13 +44,14 @@ public class AuthenticationFilter implements Filter {
         try {
             //logged
             if (userName == null && password == null && session.getAttribute("user_name") != null) {
-                return;
+                // User is already logged in
             } else {
                 try {
                     if (dbAccessible) {
                         User user = userDAO.userByName(userName);
                         //Not logged
                         if (user == null) {
+                            logger.info("User " + userName + " not found");
                             logout(session);
                         } else {
                             //just logged
@@ -56,7 +63,9 @@ public class AuthenticationFilter implements Filter {
                                 session.setAttribute("user_name", user.getName());
                                 session.setAttribute("user_password_hash", user.getPasswordHash());
                                 session.setAttribute("user_role", id);
+                                logger.info("User " + user.getName() + " logged in");
                             }else {
+                                logger.error("User " + userName + " not found");
                                 logout(session);
                             }
                         }

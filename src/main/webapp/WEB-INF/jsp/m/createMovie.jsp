@@ -7,9 +7,13 @@
   To change this template use File | Settings | File Templates.
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="com.poluectov.criticine.webapp.model.data.CinemaType" %>
-<%@ page import="com.poluectov.criticine.webapp.controller.ErrorMessage" %>
-<%@ page import="java.util.List" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+
+<%@ page isELIgnored="false" %>
+<fmt:setBundle basename="messages"/>
+
+<fmt:setLocale value="en"/>
+<fmt:bundle basename="messages"/>
 
 <html>
 <head>
@@ -26,30 +30,29 @@
             <input type="hidden" name="method" id="method" value="PUT">
             <input type="hidden" name="cinema-id" id="cinema-id" value="${requestScope.cinema_id}">
         </c:if>
-        <label for="cinema-name">Cinema Name:</label>
-        <input type="text" name="cinema-name" id="cinema-name" placeholder="cinema_name..."
+        <label for="cinema-name"><fmt:message key="createCinema.name"/>:</label>
+        <input type="text" name="cinema-name" id="cinema-name" placeholder="<fmt:message key="createCinema.name.placeholder"/>"
                value="${not empty requestScope.cinema_name ? requestScope.cinema_name : ''}">
-
         <br>
-        <label for="creation-year">Creation year:</label>
+        <label for="creation-year"><fmt:message key="createCinema.year"/>:</label>
         <input type="text" name="creation-year" id="creation-year" placeholder="yyyy"
                value="${not empty requestScope.cinema_creation_year ? requestScope.cinema_creation_year : ''}">
-        <label for="picture">Cinema picture:</label>
+        <label for="picture"><fmt:message key="createCinema.picture"/>:</label>
         <input type="file" name="picture" id="picture">
-        <label for="cinema-type">CinemaType:</label>
+        <label for="cinema-type"><fmt:message key="createCinema.cinemaType"/>:</label>
         <select name="cinema-type" id="cinema-type">
             <!-- Options will be populated dynamically by the server -->
             <c:forEach var="cinemaType" items="${requestScope.cinemaTypes}">
-                <option>${cinemaType.getTypeName()}</option>
+                <option value="${cinemaType.getId()}"><fmt:message key="${cinemaType.getTypeName()}"/></option>
             </c:forEach>
         </select>
         <br>
 
         <button type="submit" class="createFilm">
             <c:choose>
-                <c:when test="${requestScope.method == 'PUT'}">Update Film</c:when>
-                <c:when test="${requestScope.method == 'DELETE'}">Delete Film</c:when>
-                <c:otherwise>Create Film</c:otherwise>
+                <c:when test="${requestScope.method == 'PUT'}"><fmt:message key="createCinema.update"/></c:when>
+                <c:when test="${requestScope.method == 'DELETE'}"><fmt:message key="createCinema.delete"/></c:when>
+                <c:otherwise><fmt:message key="createCinema.create"/></c:otherwise>
             </c:choose>
         </button>
     </form>
@@ -57,7 +60,7 @@
     <c:if test="${not empty errors}">
         <ul>
             <c:forEach var="error" items="${errors}">
-                <li>${error.getMessage()}</li>
+                <li><fmt:message key="${error.getMessage()}"/></li>
             </c:forEach>
         </ul>
     </c:if>

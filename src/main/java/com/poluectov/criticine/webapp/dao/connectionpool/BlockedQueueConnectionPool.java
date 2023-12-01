@@ -1,7 +1,9 @@
 package com.poluectov.criticine.webapp.dao.connectionpool;
 
 import com.poluectov.criticine.webapp.ApplicationContext;
+import com.poluectov.criticine.webapp.controller.criticspage.GetCriticsCommand;
 import com.poluectov.criticine.webapp.exception.DataBaseNotAvailableException;
+import org.apache.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -11,6 +13,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
 public class BlockedQueueConnectionPool implements ConnectionPool {
+
+    Logger logger = Logger.getLogger(BlockedQueueConnectionPool.class);
     private final String url;
     private final String userName;
     private final String password;
@@ -22,7 +26,7 @@ public class BlockedQueueConnectionPool implements ConnectionPool {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            logger.error(e);
             throw new RuntimeException(e);
         }
         this.url = url;
@@ -39,7 +43,7 @@ public class BlockedQueueConnectionPool implements ConnectionPool {
             try {
                 connection = createConnection();
             }catch (SQLException e){
-                e.printStackTrace();
+                logger.error(e);
                 throw new DataBaseNotAvailableException(e);
             }
         }

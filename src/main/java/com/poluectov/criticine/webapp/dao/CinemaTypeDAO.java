@@ -9,4 +9,5 @@ public interface CinemaTypeDAO {
     List<CinemaType> getAllTypes() throws SQLException;
 
     int getCinemaTypeId(String typeName) throws SQLException;
+    CinemaType get(int id) throws SQLException;
 }

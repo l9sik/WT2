@@ -1,7 +1,13 @@
 <!-- JSP (представление) -->
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
+<%@ page isELIgnored="false" %>
+<fmt:setBundle basename="messages"/>
+
+<fmt:setLocale value="en"/>
+<fmt:bundle basename="messages"/>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -20,10 +26,10 @@
     <table border="1">
         <thead>
         <tr>
-            <th>User</th>
-            <th>Cinema</th>
-            <th>Rating</th>
-            <th>Review</th>
+            <th><fmt:message key="critics.user"/></th>
+            <th><fmt:message key="critics.cinema"/></th>
+            <th><fmt:message key="critics.rating"/></th>
+            <th><fmt:message key="critics.review"/></th>
         </tr>
         </thead>
         <tbody>
@@ -40,7 +46,7 @@
 </c:if>
 
 <c:if test="${empty reviews}">
-    <p>No reviews available.</p>
+    <p><fmt:message key="critics.no_reviews_yet"/></p>
 </c:if>
 
 <jsp:include page="../includes/footer.jsp" />

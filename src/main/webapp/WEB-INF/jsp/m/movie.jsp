@@ -1,6 +1,13 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page import="com.poluectov.criticine.webapp.ApplicationContext" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+
+<%@ page isELIgnored="false" %>
+<fmt:setBundle basename="messages"/>
+
+<fmt:setLocale value="en"/>
+<fmt:bundle basename="messages"/>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -24,31 +31,32 @@
 <br>
 <c:if test="${not empty cinema}">
     <div class="cinema-details">
-        <h2>${cinema.getName()} Details</h2>
+        <h2>${cinema.getName()} <fmt:message key="cinema.details"/></h2>
 
         <div class="cinema-info">
-            <span class="label">Picture:</span><br>
-            <img src="../../uploads/${cinema.getPictureFile()}" alt="Cinema Picture">
+            <span class="label"><fmt:message key="cinema.picture"/>:</span><br>
+            <img src="../../uploads/${cinema.getPictureFile()}" alt="<fmt:message key="cinema.picture"/>">
         </div>
 
         <div class="cinema-info">
-            <span class="label">Name:</span> ${cinema.getName()}<br>
-            <span class="label">Rating:</span> <div class=" rating-container">${cinema.getRating()}</div><br>
-            <span class="label">Creation Year:</span> ${cinema.getCreationYear()}<br>
-            <span class="label">Type:</span> ${cinema.getCinemaType().getTypeName()}<br>
+            <span class="label"><fmt:message key="cinema.name"/>:</span> ${cinema.getName()}<br>
+            <fmt:formatNumber value="${cinema.getRating()}" pattern="#,##0.00" var="formattedNumber" />
+            <span class="label"><fmt:message key="cinema.rating"/>:</span> <div class=" rating-container">${formattedNumber}</div><br>
+            <span class="label"><fmt:message key="cinema.creation_year"/>:</span> ${cinema.getCreationYear()}<br>
+            <span class="label"><fmt:message key="cinema.type"/>:</span> <fmt:message key="${cinema.getCinemaType().getTypeName()}"/><br>
         </div>
 
         <c:if test="${sessionScope.user_role == 2}">
             <div>
                 <a href="<%=request.getContextPath()%>/app/m/create?method=PUT&cinema-id=${cinema.getId()}&cinema-name=${cinema.getName()}&cinema-creation-year=${cinema.getCreationYear()}">
-                    <button>Update</button>
+                    <button><fmt:message key="createCinema.update"/></button>
                 </a>
             </div>
         </c:if>
 
         <!-- Add more details as needed -->
 
-        <a href="<%=request.getContextPath()%>/app/">Back to Cinema List</a>
+        <a href="<%=request.getContextPath()%>/app/"><fmt:message key="cinema.back_to_cinema_list"/></a>
     </div>
 </c:if>
 
@@ -81,10 +89,10 @@
             <br>
             <br>
 
-            <label for="review">Review:</label>
+            <label for="review"><fmt:message key="cinema.review"/>:</label>
             <textarea class="review-text" id="review" name="review" rows="4" required></textarea>
-
-            <button type="submit" >Leave Feedback</button>
+            <br>
+            <button type="submit" ><fmt:message key="cinema.leave_feedback"/></button>
         </form>
     </div>
 </c:if>
@@ -95,9 +103,7 @@
                 <div class="comment-container">
                     <div class="comment-header">
                         <span class="user">${review.getUser().getName()}</span>
-                        <c:set var="decimalFormat" value="${'#.#    '}" />
-                        <c:set var="formattedNumber" value="${decimalFormat.format(review.getRating())}" />
-                        <span class="rating">Rating: ${formattedNumber}</span>
+                        <span class="rating"><fmt:message key="cinema.rating"/>: ${review.getRating()}</span>
                     </div>
                     <div class="comment-text">
                             ${review.getReview()}
@@ -105,7 +111,7 @@
                 </div>
             </c:forEach>
         </c:when>
-        <c:otherwise>No reviews yet</c:otherwise>
+        <c:otherwise><fmt:message key="cinema.no_reviews_yet"/></c:otherwise>
     </c:choose>
 </div>
 

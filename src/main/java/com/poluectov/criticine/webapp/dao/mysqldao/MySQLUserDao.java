@@ -7,6 +7,7 @@ import com.poluectov.criticine.webapp.dao.connectionpool.WrappedConnection;
 import com.poluectov.criticine.webapp.exception.DataBaseNotAvailableException;
 import com.poluectov.criticine.webapp.exception.StatementNotCreatedException;
 import com.poluectov.criticine.webapp.model.data.User;
+import org.apache.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -14,6 +15,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class MySQLUserDao implements UserDAO {
+    Logger logger = Logger.getLogger(MySQLUserDao.class);
     public static final String USER_ID = "user_id";
     public static final String USER_NAME = "user_name";
     public static final String USER_EMAIL = "user_email";
@@ -24,16 +26,16 @@ public class MySQLUserDao implements UserDAO {
     public static final String DB = "user";
 
 
-    private static final String getUserSQL = "SELECT * FROM "+DB+" WHERE "+USER_ID+" = ?";
-    private static final String insertUserSQL = "INSERT INTO "+DB+" ("
-            +USER_NAME+", "
-            +USER_EMAIL+", "
-            +USER_PASSWORD_HASH+", "
-            +USER_IS_VERIFIED+", "
-            +USER_ROLE+", "
-            +USER_STATUS+")" +
+    private static final String getUserSQL = "SELECT * FROM " + DB + " WHERE " + USER_ID + " = ?";
+    private static final String insertUserSQL = "INSERT INTO " + DB + " ("
+            + USER_NAME + ", "
+            + USER_EMAIL + ", "
+            + USER_PASSWORD_HASH + ", "
+            + USER_IS_VERIFIED + ", "
+            + USER_ROLE + ", "
+            + USER_STATUS + ")" +
             "VALUES (?, ?, ?, ?, ?, ?)";
-    private static final String updateUserIdSQL = "UPDATE "+DB+" " +
+    private static final String updateUserIdSQL = "UPDATE " + DB + " " +
             "SET "
             + USER_NAME + "=?, "
             + USER_EMAIL + "=?, "
@@ -43,11 +45,11 @@ public class MySQLUserDao implements UserDAO {
             + USER_STATUS + "=? " + "WHERE "
             + USER_ID + "=?";
 
-    private static final String isUserInDBSQL = "SELECT * FROM "+DB+" WHERE "
-            +USER_NAME+"=? AND "
-            +USER_PASSWORD_HASH+"=?";
-    private static final String userByNameSQL = "SELECT * FROM "+DB+" WHERE "
-            +USER_NAME+"=?";
+    private static final String isUserInDBSQL = "SELECT * FROM " + DB + " WHERE "
+            + USER_NAME + "=? AND "
+            + USER_PASSWORD_HASH + "=?";
+    private static final String userByNameSQL = "SELECT * FROM " + DB + " WHERE "
+            + USER_NAME + "=?";
 
 
     private static final int USER_ID_UPDATE_REQUEST_COUNT = 7;
@@ -96,17 +98,16 @@ public class MySQLUserDao implements UserDAO {
     }
 
 
-
     @Override
-    public User userByPassword(String name, String password) throws SQLException{
-        if (name == null || password == null){
+    public User userByPassword(String name, String password) throws SQLException {
+        if (name == null || password == null) {
             return null;
         }
-        try(WrappedConnection connection = connectionPool.getConnection()) {
-            try(PreparedStatement statement = connection.prepareStatement(isUserInDBSQL)){
+        try (WrappedConnection connection = connectionPool.getConnection()) {
+            try (PreparedStatement statement = connection.prepareStatement(isUserInDBSQL)) {
                 statement.setString(1, name);
                 statement.setString(2, password);
-                try(ResultSet resultSet = statement.executeQuery()) {
+                try (ResultSet resultSet = statement.executeQuery()) {
 
                     if (resultSet.next()) {
                         return createUser(resultSet);
@@ -114,25 +115,28 @@ public class MySQLUserDao implements UserDAO {
 
                 }
             }
-        }catch (DataBaseNotAvailableException | StatementNotCreatedException e) {
+        } catch (DataBaseNotAvailableException | StatementNotCreatedException e) {
+            logger.error(e);
             throw e;
-        }catch (SQLException e){
-            e.printStackTrace();
+        } catch (SQLException e) {
+            logger.error(e);
             throw new SQLException("Exception when getting from dataBase", e);
-        }catch (Exception e){
+        } catch (Exception e) {
             //in case when .close method brings exception
+            logger.error(e);
             throw new RuntimeException("close() method in WrappedConnection failed", e);
         }
+        logger.info("User not found by" + name + " " + password);
         return null;
     }
 
     @Override
     public User userByName(String name) throws SQLException {
         if (name == null) return null;
-        try(WrappedConnection connection = connectionPool.getConnection()) {
-            try(PreparedStatement statement = connection.prepareStatement(userByNameSQL)){
+        try (WrappedConnection connection = connectionPool.getConnection()) {
+            try (PreparedStatement statement = connection.prepareStatement(userByNameSQL)) {
                 statement.setString(1, name);
-                try(ResultSet resultSet = statement.executeQuery()) {
+                try (ResultSet resultSet = statement.executeQuery()) {
 
                     if (resultSet.next()) {
                         return createUser(resultSet);
@@ -140,15 +144,18 @@ public class MySQLUserDao implements UserDAO {
 
                 }
             }
-        }catch (DataBaseNotAvailableException | StatementNotCreatedException e) {
+        } catch (DataBaseNotAvailableException | StatementNotCreatedException e) {
+            logger.error(e);
             throw e;
-        }catch (SQLException e){
-            e.printStackTrace();
+        } catch (SQLException e) {
+            logger.error(e);
             throw new SQLException("Exception when getting from dataBase", e);
-        }catch (Exception e){
+        } catch (Exception e) {
             //in case when .close method brings exception
+            logger.error(e);
             throw new RuntimeException("close() method in WrappedConnection failed", e);
         }
+        logger.info("User not found by" + name);
         return null;
     }
 }

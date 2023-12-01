@@ -1,14 +1,17 @@
 package com.poluectov.criticine.webapp.controller;
 
 import com.poluectov.criticine.webapp.ApplicationContext;
+import com.poluectov.criticine.webapp.controller.criticspage.GetCriticsCommand;
 import com.poluectov.criticine.webapp.exception.RequestCorruptedException;
 import com.poluectov.criticine.webapp.exception.ServletControllerNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class HttpControllerCommander implements ControllerCommander {
+    Logger logger = Logger.getLogger(HttpControllerCommander.class);
     Map<String, ControllerCommander> controllerFactoryMap;
     ControllerCommander notFoundPage;
     public HttpControllerCommander(ControllerCommander mainPageControllerCommander,
@@ -44,6 +47,7 @@ public class HttpControllerCommander implements ControllerCommander {
             System.out.println(requestAddress);
             specificController = controllerFactoryMap.get(requestAddress);
         }catch (NullPointerException e){
+            logger.error(e);
             specificController = notFoundPage;
         }
         if (specificController == null){
